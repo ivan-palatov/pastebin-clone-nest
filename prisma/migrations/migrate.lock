@@ -1,0 +1,5 @@
+# Prisma Migrate lockfile v1
+
+20200802171802-add_user_model
+20200802173028-add_paste_model
+20200802180928-made_author_optional

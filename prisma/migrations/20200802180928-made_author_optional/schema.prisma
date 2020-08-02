@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url = "***"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String @unique
+  email String @unique
+  password String
+  pastes Paste[]
+}
+
+model Paste {
+  id Int @id @default(autoincrement())
+  title String?
+  lang String @default("text")
+  date DateTime @default(now())
+  expiresIn DateTime?
+  views Int @default(0)
+  exposure Exposure
+  author User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+}
+
+enum Exposure {
+  PRIVATE
+  PUBLIC
+  UNLISTED
+}
