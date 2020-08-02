@@ -7,10 +7,11 @@ import {
   UserWhereInput,
   UserWhereUniqueInput,
 } from '@prisma/client';
-import { PrismaService } from './prisma.service';
+import bcrypt from 'bcrypt';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
-export class UserService {
+export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async user(userWhereUniqueInput: UserWhereUniqueInput): Promise<User | null> {
@@ -28,7 +29,8 @@ export class UserService {
   }
 
   async createUser(data: UserCreateInput) {
-    return this.prisma.user.create({ data });
+    const password = await bcrypt.hash(data.password, 10);
+    return this.prisma.user.create({ data: { ...data, password } });
   }
 
   async updateUser(params: {

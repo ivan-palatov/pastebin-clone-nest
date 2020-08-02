@@ -1,12 +1,23 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { PasteService } from './paste.service';
-import { UserService } from './user.service';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthService } from './auth/auth.service';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { LocalAuthGuard } from './auth/local-auth.guard';
+import { PastesService } from './pastes/pastes.service';
+import { UsersService } from './users/users.service';
 
 @Controller()
 export class AppController {
   constructor(
-    private readonly userService: UserService,
-    private readonly pasteService: PasteService,
+    private readonly userService: UsersService,
+    private readonly pasteService: PastesService,
+    private readonly authService: AuthService,
   ) {}
 
   @Get('paste/:id')
@@ -34,5 +45,17 @@ export class AppController {
         authorId: Number(id),
       },
     });
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  login(@Request() req) {
+    return this.authService.login(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }

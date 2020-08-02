@@ -7,10 +7,10 @@ import {
   PasteWhereInput,
   PasteWhereUniqueInput,
 } from '@prisma/client';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
-export class PasteService {
+export class PastesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async paste(where: PasteWhereUniqueInput): Promise<Paste | null> {
