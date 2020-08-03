@@ -28,6 +28,7 @@
     "@nestjs/passport": "^7.1.0",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/schedule": "^0.4.0",
+    "@nestjs/swagger": "^4.5.12",
     "@prisma/cli": "^2.3.0",
     "@prisma/client": "^2.3.0",
     "bcrypt": "^5.0.0",
@@ -39,7 +40,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
-    "shortid": "^2.2.15"
+    "shortid": "^2.2.15",
+    "swagger-ui-express": "^4.1.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",

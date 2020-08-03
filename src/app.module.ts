@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { PastesModule } from './pastes/pastes.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -18,6 +17,5 @@ import { UsersModule } from './users/users.module';
     PastesModule,
     TasksModule,
   ],
-  controllers: [AppController],
 })
 export class AppModule {}
