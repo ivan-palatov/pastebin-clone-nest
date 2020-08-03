@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -21,8 +22,8 @@ export class AppController {
   ) {}
 
   @Get('paste/:id')
-  getPasteById(@Param('id') id: string) {
-    return this.pasteService.paste({ id: Number(id) });
+  getPasteById(@Param('id') shortId: string) {
+    return this.pasteService.paste({ shortId });
   }
 
   @Get('pastes')
@@ -51,6 +52,11 @@ export class AppController {
   @Post('login')
   login(@Request() req) {
     return this.authService.login(req.user);
+  }
+
+  @Post('register')
+  async register(@Body() data) {
+    return this.userService.createUser(data);
   }
 
   @UseGuards(JwtAuthGuard)

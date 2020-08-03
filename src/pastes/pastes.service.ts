@@ -7,6 +7,7 @@ import {
   PasteWhereInput,
   PasteWhereUniqueInput,
 } from '@prisma/client';
+import shortid from 'shortid';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -31,7 +32,14 @@ export class PastesService {
 
   async createPaste(data: PasteCreateInput) {
     return this.prisma.paste.create({
-      data,
+      data: {
+        ...data,
+        date: new Date(),
+        shortId: shortid.generate(),
+        author: {
+          connect: { email: 'haha' }, // TODO: add actual author, but only if its not asGuest
+        },
+      },
     });
   }
 
@@ -39,12 +47,22 @@ export class PastesService {
     where: PasteWhereUniqueInput;
     data: PasteUpdateInput;
   }) {
+    // TODO: check if it is author who updates it
     return this.prisma.paste.update(params);
   }
 
   async deletePaste(where: PasteWhereUniqueInput) {
+    // TODO: check if it was created by the one who deletes it
     return this.prisma.paste.delete({
       where,
+    });
+  }
+
+  async removeExpired() {
+    this.prisma.paste.deleteMany({
+      where: {
+        AND: [{ expiresIn: { not: null } }, { expiresIn: { lte: new Date() } }],
+      },
     });
   }
 }
