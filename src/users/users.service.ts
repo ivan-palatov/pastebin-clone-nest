@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import {
   User,
   UserCreateInput,
@@ -8,7 +8,7 @@ import {
   UserWhereUniqueInput,
 } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
@@ -29,6 +29,13 @@ export class UsersService {
   }
 
   async createUser(data: UserCreateInput) {
+    const user = await this.prisma.user.findMany({
+      where: { OR: [{ email: data.email }, { name: data.name }] },
+    });
+    if (user.length > 0) {
+      throw new ConflictException('User already exists');
+    }
+
     const password = await bcrypt.hash(data.password, 10);
     return this.prisma.user.create({ data: { ...data, password } });
   }
@@ -37,10 +44,12 @@ export class UsersService {
     where: UserWhereUniqueInput;
     data: UserUpdateInput;
   }) {
+    // TODO: check if has rights
     return this.prisma.user.update(params);
   }
 
   async deleteUser(where: UserWhereUniqueInput) {
+    // TODO: check if has rights
     return this.prisma.user.delete({ where });
   }
 }

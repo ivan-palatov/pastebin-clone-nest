@@ -8,7 +8,7 @@ import {
   PasteWhereUniqueInput,
 } from '@prisma/client';
 import shortid from 'shortid';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PastesService {

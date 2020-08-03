@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { PastesService } from 'src/pastes/pastes.service';
 
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
-  @Cron('0 * * * * *')
+  constructor(private readonly pastesService: PastesService) {}
+
+  @Cron(CronExpression.EVERY_MINUTE)
   handleCron() {
-    this.logger.debug('Called every second');
+    this.logger.debug('Called every minute');
+    this.pastesService.removeExpired();
   }
 }
