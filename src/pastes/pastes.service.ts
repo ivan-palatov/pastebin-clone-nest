@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import {
   Paste,
   PasteOrderByInput,
@@ -31,10 +31,11 @@ export class PastesService {
     return this.prisma.paste.findMany(params);
   }
 
-  async createPaste(data: CreatePasteDto) {
+  async createPaste(data: CreatePasteDto, userId?: number) {
     return this.prisma.paste.create({
       data: {
         ...data,
+        author: data.asUser && userId ? { connect: { id: userId } } : null,
         date: new Date(),
         shortId: shortid.generate(),
         expiresIn: data.expiresIn
@@ -46,7 +47,13 @@ export class PastesService {
     });
   }
 
-  async updatePaste(where: PasteWhereUniqueInput, data: UpdatePasteDto) {
+  async updatePaste(
+    where: PasteWhereUniqueInput,
+    data: UpdatePasteDto,
+    userId: number,
+  ) {
+    await this.checkIfAuthor(where, userId);
+
     return this.prisma.paste.update({
       where,
       data: {
@@ -60,7 +67,9 @@ export class PastesService {
     });
   }
 
-  async deletePaste(where: PasteWhereUniqueInput) {
+  async deletePaste(where: PasteWhereUniqueInput, userId: number) {
+    await this.checkIfAuthor(where, userId);
+
     return this.prisma.paste.delete({
       where,
     });
@@ -72,5 +81,14 @@ export class PastesService {
         AND: [{ expiresIn: { not: null } }, { expiresIn: { lte: new Date() } }],
       },
     });
+  }
+
+  private async checkIfAuthor(where: PasteWhereUniqueInput, userId: number) {
+    if (
+      (await this.prisma.paste.findOne({ where, include: { author: true } }))
+        .authorId !== userId
+    ) {
+      throw new ForbiddenException('You are not the owner of this paste');
+    }
   }
 }

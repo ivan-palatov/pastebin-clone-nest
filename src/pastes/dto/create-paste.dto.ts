@@ -1,5 +1,6 @@
 import { Exposure } from '@prisma/client';
 import {
+  IsBoolean,
   IsEnum,
   IsNumber,
   IsOptional,
@@ -28,4 +29,7 @@ export class CreatePasteDto {
   @IsOptional()
   @IsString()
   lang?: string;
+
+  @IsBoolean()
+  asUser: boolean;
 }

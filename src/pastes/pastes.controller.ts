@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { CreatePasteDto } from './dto/create-paste.dto';
 import { UpdatePasteDto } from './dto/update-paste.dto';
 import { PastesService } from './pastes.service';
@@ -22,14 +23,17 @@ export class PastesController {
   }
 
   @Post()
-  addPaste(@Body() data: CreatePasteDto) {
-    // TODO: Add author if exists
-    return this.pasteService.createPaste({ ...data, author: null } as any);
+  addPaste(@Body() data: CreatePasteDto, @CurrentUser('id') id: number) {
+    return this.pasteService.createPaste({ ...data }, id);
   }
 
   @Patch(':id')
-  changePaste(@Param('id') shortId: string, @Body() data: UpdatePasteDto) {
-    // TODO: Check if user === paste.author
-    return this.pasteService.updatePaste({ shortId }, data);
+  // TODO: Check if authorized
+  changePaste(
+    @Param('id') shortId: string,
+    @Body() data: UpdatePasteDto,
+    @CurrentUser('id') id: number,
+  ) {
+    return this.pasteService.updatePaste({ shortId }, data, id);
   }
 }
