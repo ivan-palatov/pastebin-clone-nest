@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   User,
   UserCreateInput,
@@ -7,14 +7,16 @@ import {
   UserWhereInput,
   UserWhereUniqueInput,
 } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async user(userWhereUniqueInput: UserWhereUniqueInput): Promise<User | null> {
+  async findOne(
+    userWhereUniqueInput: UserWhereUniqueInput,
+  ): Promise<User | null> {
     return this.prisma.user.findOne({ where: userWhereUniqueInput });
   }
 
@@ -33,7 +35,7 @@ export class UsersService {
       where: { OR: [{ email: data.email }, { name: data.name }] },
     });
     if (user.length > 0) {
-      throw new ConflictException('User already exists');
+      throw new BadRequestException('User already exists');
     }
 
     const password = await bcrypt.hash(data.password, 10);
