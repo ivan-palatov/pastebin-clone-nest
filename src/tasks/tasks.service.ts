@@ -9,8 +9,8 @@ export class TasksService {
   constructor(private readonly pastesService: PastesService) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
-  handleCron() {
-    this.logger.debug('Called every minute');
-    this.pastesService.removeExpired();
+  async handleCron() {
+    await this.pastesService.removeExpired();
+    this.logger.log('Expired pastes have been removed.');
   }
 }
