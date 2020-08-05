@@ -15,13 +15,13 @@ import { UpdatePasteDto } from './dto/update-paste.dto';
 export class PastesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async paste(where: PasteWhereUniqueInput): Promise<Paste | null> {
+  async findOne(where: PasteWhereUniqueInput): Promise<Paste | null> {
     return this.prisma.paste.findOne({
       where,
     });
   }
 
-  async pastes(params: {
+  async findMany(params: {
     skip?: number;
     take?: number;
     cursor?: PasteWhereUniqueInput;
@@ -39,9 +39,7 @@ export class PastesService {
         date: new Date(),
         shortId: shortid.generate(),
         expiresIn: data.expiresIn
-          ? moment()
-              .add(data.expiresIn, 'm')
-              .toDate()
+          ? moment().add(data.expiresIn, 'm').toDate()
           : null,
       },
     });
@@ -59,9 +57,7 @@ export class PastesService {
       data: {
         ...data,
         expiresIn: data.expiresIn
-          ? moment()
-              .add(data.expiresIn, 'm')
-              .toDate()
+          ? moment().add(data.expiresIn, 'm').toDate()
           : null,
       },
     });

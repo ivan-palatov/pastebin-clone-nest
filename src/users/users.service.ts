@@ -14,13 +14,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(
-    userWhereUniqueInput: UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user.findOne({ where: userWhereUniqueInput });
+  async findOne(where: UserWhereUniqueInput): Promise<User | null> {
+    return this.prisma.user.findOne({ where });
   }
 
-  async users(params: {
+  async findMany(params: {
     skip?: number;
     take?: number;
     cursor?: UserWhereUniqueInput;
@@ -34,7 +32,7 @@ export class UsersService {
     const user = await this.prisma.user.findOne({
       where: { email: data.email },
     });
-    if (!user) {
+    if (user) {
       throw new BadRequestException('User already exists');
     }
 

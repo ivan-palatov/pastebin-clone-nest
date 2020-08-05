@@ -26,14 +26,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: any,
   ) {
     try {
-      this.logger.debug('Profile');
-      this.logger.debug(profile);
-
-      this.logger.debug('accessToken');
-      this.logger.debug(accessToken);
-      this.logger.debug('refreshToken');
-      this.logger.debug(refreshToken);
-
       const user = await this.authService.validateOAuthLogin(
         profile,
         Provider.GOOGLE,

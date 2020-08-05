@@ -26,7 +26,7 @@ export class UsersController {
 
   @Get(':id/pastes')
   getUserPastes(@Param('id', ParseIntPipe) authorId: number) {
-    return this.pasteService.pastes({
+    return this.pasteService.findMany({
       take: 20,
       orderBy: { date: 'desc' },
       where: {
