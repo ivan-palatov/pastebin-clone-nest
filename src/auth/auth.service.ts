@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -9,6 +10,12 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
+
+export enum Provider {
+  GOOGLE = 'google',
+  VK = 'vk',
+  GITHUB = 'github',
+}
 
 @Injectable()
 export class AuthService {
@@ -27,6 +34,21 @@ export class AuthService {
     const { password, ...res } = user;
 
     return res;
+  }
+
+  async validateOAuthLogin(profile: any, provider: Provider) {
+    try {
+      // Could add to DB here
+
+      return {
+        username: profile.displayName,
+        photo: profile.photos[0].value,
+        email: profile.emails[0].value,
+        token: this._createToken({ sub: profile.id, provider }),
+      };
+    } catch (e) {
+      throw new InternalServerErrorException('validateOAuthLogin', e);
+    }
   }
 
   async register(userDto: CreateUserDto) {
@@ -50,16 +72,14 @@ export class AuthService {
     });
 
     return {
-      username: user.name, // TODO: check if needed
-      email: user.email, // TODO: check if needed
-      ...token,
+      username: user.name,
+      photo: (user as any).photo,
+      email: user.email,
+      token,
     };
   }
 
   private _createToken(payload: any) {
-    return {
-      accessToken: this.jwtService.sign(payload, { expiresIn: '60m' }), // TODO: check if expiresIn needed
-      // expiresIn: '60m' // TODO: check if needed
-    };
+    return this.jwtService.sign(payload);
   }
 }
