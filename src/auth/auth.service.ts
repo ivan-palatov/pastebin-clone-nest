@@ -24,7 +24,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(payload: IJwtPayload) {
+  async validateJwtLogin(payload: IJwtPayload) {
     const user = await this.usersService.findOne({ email: payload.email });
     if (!user) {
       throw new UnauthorizedException('Invalid token');
@@ -38,13 +38,32 @@ export class AuthService {
 
   async validateOAuthLogin(profile: any, provider: Provider) {
     try {
-      // Could add to DB here
+      const user = {
+        name: profile.displayName,
+        photo: profile.photos[0]?.value,
+        email: profile.emails[0].value,
+      };
+
+      const dbUser = await this.usersService.findOne({
+        email: profile.emails[0].value,
+      });
+
+      if (!dbUser) {
+        await this.usersService.createUser({
+          name: user.name,
+          email: user.email,
+          photo: user.photo,
+          password: '',
+        });
+      }
 
       return {
-        username: profile.displayName,
-        photo: profile.photos[0].value,
-        email: profile.emails[0].value,
-        token: this._createToken({ sub: profile.id, provider }),
+        ...user,
+        token: this._createToken({
+          sub: profile.id,
+          email: user.email,
+          provider,
+        }),
       };
     } catch (e) {
       throw new InternalServerErrorException('validateOAuthLogin', e);
@@ -67,13 +86,12 @@ export class AuthService {
 
     const token = this._createToken({
       email,
-      username: user.name,
       sub: user.id,
     });
 
     return {
-      username: user.name,
-      photo: (user as any).photo,
+      name: user.name,
+      photo: user.photo,
       email: user.email,
       token,
     };

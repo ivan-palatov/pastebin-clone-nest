@@ -3,10 +3,11 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Request,
   UseGuards,
 } from '@nestjs/common';
+import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { PastesService } from 'src/pastes/pastes.service';
 import { UsersService } from './users.service';
 
@@ -19,8 +20,8 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@Request() req) {
-    return req.user;
+  getProfile(@CurrentUser() user: User) {
+    return user;
   }
 
   @Get(':id/pastes')

@@ -8,8 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '@prisma/client';
-import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -26,14 +24,6 @@ export class AuthController {
   @Post('register')
   register(@Body() userDto: CreateUserDto) {
     return this.authService.register(userDto);
-  }
-
-  @Get()
-  @UseGuards(AuthGuard(['jwt', 'google']))
-  testGuard(@CurrentUser() user: User) {
-    // TODO: Make CurrentUser work without UseGuard
-    console.log('Current User: ', user);
-    return { user };
   }
 
   @Get('google')

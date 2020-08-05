@@ -31,10 +31,10 @@ export class UsersService {
   }
 
   async createUser(data: UserCreateInput) {
-    const user = await this.prisma.user.findMany({
-      where: { OR: [{ email: data.email }, { name: data.name }] },
+    const user = await this.prisma.user.findOne({
+      where: { email: data.email },
     });
-    if (user.length > 0) {
+    if (!user) {
       throw new BadRequestException('User already exists');
     }
 
