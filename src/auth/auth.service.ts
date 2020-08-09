@@ -17,6 +17,13 @@ export enum Provider {
   GITHUB = 'github',
 }
 
+export interface OAuthUser {
+  id: number | string;
+  name: string;
+  email: string;
+  photo?: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,16 +42,10 @@ export class AuthService {
     return res;
   }
 
-  async validateOAuthLogin(profile: any, provider: Provider) {
+  async validateOAuthLogin(user: OAuthUser, provider: Provider) {
     try {
-      const user = {
-        name: profile.displayName,
-        photo: profile.photos[0]?.value,
-        email: profile.emails[0].value,
-      };
-
       const dbUser = await this.usersService.findOne({
-        email: profile.emails[0].value,
+        email: user.email,
       });
 
       if (!dbUser) {
@@ -59,7 +60,7 @@ export class AuthService {
       return {
         ...user,
         token: this._createToken({
-          sub: profile.id,
+          sub: user.id,
           email: user.email,
           provider,
         }),

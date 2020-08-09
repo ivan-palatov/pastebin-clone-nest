@@ -16,7 +16,7 @@ export class CreatePasteDto {
   title?: string;
 
   @IsEnum(Exposure)
-  exposure: Exposure;
+  exposure!: Exposure;
 
   @IsOptional()
   @IsNumber()
@@ -24,12 +24,12 @@ export class CreatePasteDto {
   expiresIn?: number;
 
   @IsString()
-  text: string;
+  text!: string;
 
   @IsOptional()
   @IsString()
   lang?: string;
 
   @IsBoolean()
-  asUser: boolean;
+  asUser!: boolean;
 }

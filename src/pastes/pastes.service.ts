@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Paste,
   PasteOrderByInput,
@@ -18,6 +22,7 @@ export class PastesService {
   async findOne(where: PasteWhereUniqueInput): Promise<Paste | null> {
     return this.prisma.paste.findOne({
       where,
+      include: { author: { select: { name: true, id: true } } },
     });
   }
 
@@ -28,20 +33,24 @@ export class PastesService {
     where?: PasteWhereInput;
     orderBy?: PasteOrderByInput;
   }) {
-    return this.prisma.paste.findMany(params);
+    return this.prisma.paste.findMany({
+      ...params,
+      include: { author: { select: { name: true, id: true } } },
+    });
   }
 
   async createPaste(data: CreatePasteDto, userId?: number) {
     return this.prisma.paste.create({
       data: {
         ...data,
-        author: data.asUser && userId ? { connect: { id: userId } } : null,
+        author: data.asUser && userId ? { connect: { id: userId } } : undefined,
         date: new Date(),
         shortId: shortid.generate(),
         expiresIn: data.expiresIn
           ? moment().add(data.expiresIn, 'm').toDate()
           : null,
       },
+      include: { author: { select: { name: true, id: true } } },
     });
   }
 
@@ -60,6 +69,7 @@ export class PastesService {
           ? moment().add(data.expiresIn, 'm').toDate()
           : null,
       },
+      include: { author: { select: { name: true, id: true } } },
     });
   }
 
@@ -80,10 +90,14 @@ export class PastesService {
   }
 
   private async checkIfAuthor(where: PasteWhereUniqueInput, userId: number) {
-    if (
-      (await this.prisma.paste.findOne({ where, include: { author: true } }))
-        .authorId !== userId
-    ) {
+    const paste = await this.prisma.paste.findOne({
+      where,
+      include: { author: true },
+    });
+    if (!paste) {
+      throw new NotFoundException('Paste not found');
+    }
+    if (paste.authorId !== userId) {
       throw new ForbiddenException('You are not the owner of this paste');
     }
   }

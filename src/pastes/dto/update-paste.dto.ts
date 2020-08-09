@@ -21,5 +21,5 @@ export class UpdatePasteDto {
 
   @IsOptional()
   @IsEnum(Exposure)
-  exposure: Exposure;
+  exposure!: Exposure;
 }
