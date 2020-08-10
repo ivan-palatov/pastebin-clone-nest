@@ -18,7 +18,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "migrate:save": "prisma migrate save --experimental",
+    "migrate:up": "prisma migrate up --experimental",
+    "generate": "prisma generate"
   },
   "dependencies": {
     "@nestjs/common": "^7.0.0",
@@ -29,8 +32,8 @@
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/schedule": "^0.4.0",
     "@nestjs/swagger": "^4.5.12",
-    "@prisma/cli": "^2.4.0",
-    "@prisma/client": "^2.4.0",
+    "@prisma/cli": "^2.4.1",
+    "@prisma/client": "^2.4.1",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
@@ -54,7 +57,7 @@
     "@types/bcryptjs": "^2.4.2",
     "@types/cron": "^1.7.2",
     "@types/express": "^4.17.3",
-    "@types/jest": "26.0.8",
+    "@types/jest": "26.0.9",
     "@types/moment": "^2.13.0",
     "@types/node": "^14.0.27",
     "@types/passport-github": "^1.1.5",

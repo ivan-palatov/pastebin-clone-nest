@@ -8,6 +8,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Exposure } from '@prisma/client';
 import { ApplyUser } from 'src/auth/guards/apply-user.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
@@ -29,7 +30,7 @@ export class PastesController {
     return this.pasteService.findMany({
       take: 10,
       orderBy: { date: 'desc' },
-      where: { exposure: 'PUBLIC', expiresIn: { gte: new Date() } },
+      where: { exposure: Exposure.PUBLIC, expiresIn: { gte: new Date() } },
     });
   }
 

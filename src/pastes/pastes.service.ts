@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  Exposure,
   Paste,
   PasteOrderByInput,
   PasteWhereInput,
@@ -49,6 +50,12 @@ export class PastesService {
         expiresIn: data.expiresIn
           ? moment().add(data.expiresIn, 'm').toDate()
           : null,
+        exposure:
+          data.exposure === Exposure.PRIVATE
+            ? userId
+              ? Exposure.PRIVATE
+              : Exposure.UNLISTED
+            : data.exposure,
       },
       include: { author: { select: { name: true, id: true } } },
     });
@@ -59,7 +66,7 @@ export class PastesService {
     data: UpdatePasteDto,
     userId: number,
   ) {
-    await this.checkIfAuthor(where, userId);
+    await this._checkIfAuthor(where, userId);
 
     return this.prisma.paste.update({
       where,
@@ -74,7 +81,7 @@ export class PastesService {
   }
 
   async deletePaste(where: PasteWhereUniqueInput, userId: number) {
-    await this.checkIfAuthor(where, userId);
+    await this._checkIfAuthor(where, userId);
 
     return this.prisma.paste.delete({
       where,
@@ -89,7 +96,7 @@ export class PastesService {
     });
   }
 
-  private async checkIfAuthor(where: PasteWhereUniqueInput, userId: number) {
+  private async _checkIfAuthor(where: PasteWhereUniqueInput, userId: number) {
     const paste = await this.prisma.paste.findOne({
       where,
       include: { author: true },

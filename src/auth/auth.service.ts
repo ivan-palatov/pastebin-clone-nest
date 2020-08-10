@@ -10,18 +10,12 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
+import { IOAuthUser } from './interfaces/oauth-user.interface';
 
 export enum Provider {
   GOOGLE = 'google',
   VK = 'vk',
   GITHUB = 'github',
-}
-
-export interface OAuthUser {
-  id: number | string;
-  name: string;
-  email: string;
-  photo?: string;
 }
 
 @Injectable()
@@ -42,25 +36,22 @@ export class AuthService {
     return res;
   }
 
-  async validateOAuthLogin(user: OAuthUser, provider: Provider) {
+  async validateOAuthLogin(user: IOAuthUser, provider: Provider) {
     try {
-      const dbUser = await this.usersService.findOne({
-        email: user.email,
-      });
-
-      if (!dbUser) {
-        await this.usersService.createUser({
-          name: user.name,
+      const dbUser = await this.usersService.findOneOrCreate(
+        { email: user.email },
+        {
           email: user.email,
+          name: user.name,
           photo: user.photo,
-          password: '',
-        });
-      }
+          password: null,
+        },
+      );
 
       return {
-        ...user,
+        ...dbUser,
         token: this._createToken({
-          sub: user.id,
+          sub: dbUser.id,
           email: user.email,
           provider,
         }),
@@ -76,7 +67,7 @@ export class AuthService {
 
   async login({ email, password }: LoginUserDto) {
     const user = await this.usersService.findOne({ email });
-    if (!user) {
+    if (!user || !user.password) {
       throw new BadRequestException('Invalid credentials');
     }
 

@@ -5,7 +5,7 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Exposure, User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { PastesService } from 'src/pastes/pastes.service';
@@ -30,7 +30,7 @@ export class UsersController {
       take: 20,
       orderBy: { date: 'desc' },
       where: {
-        exposure: 'PUBLIC',
+        exposure: Exposure.PUBLIC,
         expiresIn: { gte: new Date() },
         authorId,
       },
