@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
+  Params,
   Profile,
   Strategy,
   StrategyOptions,
@@ -22,24 +23,21 @@ export class VkStrategy extends PassportStrategy(Strategy, Provider.VK) {
       clientSecret: configService.get('VK_CLIENT_SECRET'),
       callbackURL: 'http://localhost:4000/api/auth/vk/callback',
       scope: ['email'],
-      passReqToCallback: true,
     } as StrategyOptions);
   }
 
   async validate(
-    req: any,
     accessToken: string,
     refreshToken: string,
-    params: any,
+    params: Params,
     profile: Profile,
     done: VerifyCallback,
   ) {
-    this.logger.log(profile);
     try {
       const vkUser = {
         id: profile.id,
         name: profile.displayName,
-        photo: profile.photos ? profile.photos[0].value : undefined,
+        photo: profile.photos?.[0].value,
         email: profile.emails?.[0].value as string,
       };
 
