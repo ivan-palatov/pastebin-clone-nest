@@ -20,11 +20,6 @@ import { PastesService } from './pastes.service';
 export class PastesController {
   constructor(private readonly pasteService: PastesService) {}
 
-  @Get(':id')
-  getPasteById(@Param('id') shortId: string) {
-    return this.pasteService.findOne({ shortId });
-  }
-
   @Get('recent')
   getPublicPastes() {
     return this.pasteService.findMany({
@@ -32,6 +27,11 @@ export class PastesController {
       orderBy: { date: 'desc' },
       where: { exposure: Exposure.PUBLIC, expiresIn: { gte: new Date() } },
     });
+  }
+
+  @Get('/id/:id')
+  getPasteById(@Param('id') shortId: string) {
+    return this.pasteService.findOne({ shortId });
   }
 
   @Post()

@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import {
   Exposure,
-  Paste,
   PasteOrderByInput,
   PasteWhereInput,
   PasteWhereUniqueInput,
@@ -20,11 +19,16 @@ import { UpdatePasteDto } from './dto/update-paste.dto';
 export class PastesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(where: PasteWhereUniqueInput): Promise<Paste | null> {
-    return this.prisma.paste.findOne({
+  async findOne(where: PasteWhereUniqueInput) {
+    const paste = await this.prisma.paste.findOne({
       where,
       include: { author: { select: { name: true, id: true } } },
     });
+    if (!paste) {
+      throw new NotFoundException('Paste not found');
+    }
+
+    return paste;
   }
 
   async findMany(params: {
