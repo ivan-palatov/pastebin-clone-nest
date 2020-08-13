@@ -4,18 +4,23 @@ import {
   Get,
   Post,
   Req,
+  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('login')
   login(@Body() userDto: LoginUserDto) {
@@ -35,12 +40,16 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleLoginCallback(@Req() req: Request) {
+  googleLoginCallback(@Req() req: Request, @Res() res: Response) {
     if (!req.user || !(req.user as any).token) {
       throw new UnauthorizedException('Google login failed');
     }
 
-    return req.user;
+    return res.redirect(
+      `${this.configService.get('CLIENT_URL') as string}/oauth/?token=${
+        (req.user as any).token
+      }`,
+    );
   }
 
   @Get('vk')
@@ -51,12 +60,16 @@ export class AuthController {
 
   @Get('vk/callback')
   @UseGuards(AuthGuard('vk'))
-  vkLoginCallback(@Req() req: Request) {
+  vkLoginCallback(@Req() req: Request, @Res() res: Response) {
     if (!req.user || !(req.user as any).token) {
       throw new UnauthorizedException('VK login failed');
     }
 
-    return req.user;
+    return res.redirect(
+      `${this.configService.get('CLIENT_URL') as string}/oauth/?token=${
+        (req.user as any).token
+      }`,
+    );
   }
 
   @Get('github')
@@ -67,11 +80,15 @@ export class AuthController {
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
-  githubLoginCallback(@Req() req: Request) {
+  githubLoginCallback(@Req() req: Request, @Res() res: Response) {
     if (!req.user || !(req.user as any).token) {
       throw new UnauthorizedException('Github login failed');
     }
 
-    return req.user;
+    return res.redirect(
+      `${this.configService.get('CLIENT_URL') as string}/oauth/?token=${
+        (req.user as any).token
+      }`,
+    );
   }
 }
