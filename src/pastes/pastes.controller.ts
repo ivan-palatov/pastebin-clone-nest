@@ -25,7 +25,10 @@ export class PastesController {
     return this.pasteService.findMany({
       take: 10,
       orderBy: { date: 'desc' },
-      where: { exposure: Exposure.PUBLIC, expiresIn: { gte: new Date() } },
+      where: {
+        exposure: Exposure.PUBLIC,
+        OR: [{ expiresIn: { gte: new Date() } }, { expiresIn: null }],
+      },
     });
   }
 
