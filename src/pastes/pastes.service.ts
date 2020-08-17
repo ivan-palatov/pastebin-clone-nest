@@ -28,6 +28,8 @@ export class PastesService {
       throw new NotFoundException('Paste not found');
     }
 
+    await this.prisma.paste.update({ where, data: { views: paste.views + 1 } });
+
     return paste;
   }
 
