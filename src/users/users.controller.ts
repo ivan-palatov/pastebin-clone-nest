@@ -1,22 +1,21 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { Exposure, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { PastesService } from 'src/pastes/pastes.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { EditUserDto } from './dto/edit-user.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly pasteService: PastesService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
@@ -24,16 +23,23 @@ export class UsersController {
     return user;
   }
 
-  @Get(':id/pastes')
-  getUserPastes(@Param('id', ParseIntPipe) authorId: number) {
-    return this.pasteService.findMany({
-      take: 20,
-      orderBy: { date: 'desc' },
-      where: {
-        exposure: Exposure.PUBLIC,
-        expiresIn: { gte: new Date() },
-        authorId,
-      },
-    });
+  @Get(':id')
+  getUser(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOneOrThrow({ id });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  async editUser(@Body() editDto: EditUserDto, @CurrentUser('id') id: number) {
+    await this.usersService.updateUser({ id }, editDto);
+    return true;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Body() editDto: ChangePasswordDto,
+    @CurrentUser('id') id: number,
+  ) {
+    await this.usersService.changePassword({ id }, editDto);
+    return true;
   }
 }

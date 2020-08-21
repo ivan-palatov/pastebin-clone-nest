@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  Exposure,
   UserCreateInput,
   UserCreateWithoutPastesInput,
   UserOrderByInput,
@@ -14,6 +15,7 @@ import {
 } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,6 +23,28 @@ export class UsersService {
 
   async findOne(where: UserWhereUniqueInput) {
     return this.prisma.user.findOne({ where });
+  }
+
+  async findOneOrThrow(where: UserWhereUniqueInput) {
+    const user = await this.prisma.user.findOne({
+      where,
+      select: {
+        id: true,
+        email: true,
+        photo: true,
+        name: true,
+        pastes: {
+          take: 20,
+          orderBy: { date: 'desc' },
+          where: { exposure: Exposure.PUBLIC },
+        },
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 
   async findOneOrCreate(where: UserWhereUniqueInput, data: UserCreateInput) {
@@ -54,19 +78,35 @@ export class UsersService {
     return this.prisma.user.create({ data: { ...data, password } });
   }
 
-  async updateUser(
+  async updateUser(where: UserWhereUniqueInput, data: UserUpdateInput) {
+    const user = await this.prisma.user.findOne({ where });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.user.update({ where, data });
+  }
+
+  async changePassword(
     where: UserWhereUniqueInput,
-    data: UserUpdateInput,
-    currentUserId: number,
+    editDto: ChangePasswordDto,
   ) {
     const user = await this.prisma.user.findOne({ where });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    if (user.id !== currentUserId) {
-      throw new ForbiddenException();
+
+    if (
+      user.password &&
+      !(await bcrypt.compare(editDto.currentPassword, user.password))
+    ) {
+      throw new ForbiddenException('Current password is incorrect');
     }
-    return this.prisma.user.update({ where, data });
+
+    return this.prisma.user.update({
+      where,
+      data: { password: await bcrypt.hash(editDto.newPassword, 10) },
+    });
   }
 
   async deleteUser(where: UserWhereUniqueInput, currentUserId: number) {

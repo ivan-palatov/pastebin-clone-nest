@@ -9,7 +9,7 @@ import {
   PasteWhereInput,
   PasteWhereUniqueInput,
 } from '@prisma/client';
-import moment from 'moment';
+import * as moment from 'moment';
 import * as shortid from 'shortid';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePasteDto } from './dto/create-paste.dto';
@@ -97,7 +97,7 @@ export class PastesService {
   }
 
   async removeExpired() {
-    this.prisma.paste.deleteMany({
+    await this.prisma.paste.deleteMany({
       where: {
         AND: [{ expiresIn: { not: null } }, { expiresIn: { lte: new Date() } }],
       },
