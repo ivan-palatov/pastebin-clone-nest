@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   UseGuards,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
@@ -29,12 +30,14 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Patch()
   async editUser(@Body() editDto: EditUserDto, @CurrentUser('id') id: number) {
     await this.usersService.updateUser({ id }, editDto);
     return true;
   }
 
   @UseGuards(JwtAuthGuard)
+  @Patch('/change-password')
   async changePassword(
     @Body() editDto: ChangePasswordDto,
     @CurrentUser('id') id: number,
