@@ -98,7 +98,8 @@ export class UsersService {
 
     if (
       user.password &&
-      !(await bcrypt.compare(editDto.currentPassword, user.password))
+      (!editDto.currentPassword ||
+        !(await bcrypt.compare(editDto.currentPassword, user.password)))
     ) {
       throw new ForbiddenException('Current password is incorrect');
     }
